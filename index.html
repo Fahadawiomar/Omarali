@@ -6,33 +6,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>الاخوان لتنفيذ واجهات 🇮🇶</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Firebase compat (works on all browsers including Safari iOS) -->
 <script>
+  // استخدام Firebase REST API بدون مكتبة خارجية - يعمل على كل المتصفحات
   const FB_URL = "https://omar-ali-97d74-default-rtdb.firebaseio.com";
-  const ADMIN_PASSWORD = "1234";
 
 window.*fbSet = async (path, val) => {
 try {
-const cleanPath = path.replace(/[.#$[]]/g, ‘*’);
+const cleanPath = path.replace(/[.#$[]]/g, ’*’);
 const url = FB_URL + ‘/’ + cleanPath + ‘.json’;
-const res = await fetch(url, { method: ‘PUT’, headers: {‘Content-Type’: ‘application/json’}, body: JSON.stringify(val) });
+const res = await fetch(url, {
+method: ‘PUT’,
+headers: {‘Content-Type’: ‘application/json’},
+body: JSON.stringify(val)
+});
 const result = await res.json();
 if (result && result.error) throw new Error(result.error);
-localStorage.setItem(’backup*’ + cleanPath.replace(///g,’_’), JSON.stringify(val));
+localStorage.setItem(‘backup_’ + cleanPath.replace(///g,’_’), JSON.stringify(val));
 return true;
-} catch(e) { console.error(‘Firebase save failed:’, e); return false; }
+} catch(e) {
+console.error(‘Firebase save failed:’, e);
+return false;
+}
 };
 
 window.*fbGet = async (path) => {
 try {
-const cleanPath = path.replace(/[.#$[]]/g, ‘*’);
+const cleanPath = path.replace(/[.#$[]]/g, ’*’);
 const url = FB_URL + ‘/’ + cleanPath + ‘.json’;
 const res = await fetch(url);
 const result = await res.json();
 if (result && result.error) throw new Error(result.error);
-if (result !== null) localStorage.setItem(’backup*’ + cleanPath.replace(///g,’*’), JSON.stringify(result));
+if (result !== null) localStorage.setItem(‘backup_’ + cleanPath.replace(///g,’*’), JSON.stringify(result));
 return result;
 } catch(e) {
-const local = localStorage.getItem(‘backup_’ + path.replace(/[.#$[]]/g,’*’).replace(///g,’*’));
+console.error(‘Firebase read failed:’, e);
+const local = localStorage.getItem(’backup*’ + path.replace(/[.#$[]/]/g,’_’));
 return local ? JSON.parse(local) : null;
 }
 };
@@ -50,13 +59,11 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 .tab-btn { padding: 6px 14px; border-radius: 20px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
 .tab-btn.active { background: white; color: #1565C0; }
 .tab-btn:not(.active) { background: rgba(255,255,255,0.2); color: white; }
+.sync-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-left: 5px; }
 .sync-label { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 600; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .sync-ok { background: #4caf50; color: white; }
 .sync-pending { background: #ff9800; color: white; }
 .sync-error { background: #f44336; color: white; }
-
-.admin-badge { background: #ffd600; color: #333; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
-.viewer-badge { background: rgba(255,255,255,0.25); color: white; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
 
 .week-bar { background: white; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #e0e0e0; flex-wrap: wrap; gap: 8px; }
 .week-label { background: white; border: 2px solid #1565C0; color: #1565C0; font-weight: 700; padding: 6px 14px; border-radius: 8px; font-size: 14px; font-family: inherit; }
@@ -92,7 +99,6 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 .days-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
 .day-btn { padding: 6px 10px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; background: #e53935; color: white; transition: background .15s; }
 .day-btn.present { background: #2e7d32; }
-.day-btn:disabled { cursor: default; opacity: 0.85; }
 .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
 .input-box { display: flex; flex-direction: column; gap: 3px; }
 .input-box label { font-size: 11px; color: #666; font-weight: 600; }
@@ -106,7 +112,6 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 .item-amount { font-weight: 700; }
 .item-date { font-size: 12px; color: #888; }
 .delete-btn { background: #e53935; color: white; border: none; border-radius: 6px; min-width: 28px; height: 28px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-
 .empty-msg { text-align: center; color: #aaa; padding: 16px; font-size: 14px; }
 
 .summary-box { border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
@@ -128,31 +133,19 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 .payment-item .p-note { font-size: 13px; color: #555; }
 .payment-item .p-date { font-size: 12px; color: #888; }
 
-.readonly-notice { background: #fff3e0; border: 2px solid #e65100; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 14px; color: #e65100; font-weight: 600; text-align: center; }
-
 .loading-overlay { position: fixed; inset: 0; background: rgba(21,101,192,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; z-index: 9999; gap: 16px; }
 .loading-overlay.hidden { display: none; }
 .spinner { width: 48px; height: 48px; border: 5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.session-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9998; }
+.session-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9998; }
 .session-modal.hidden { display: none; }
-.session-box { background: white; border-radius: 20px; padding: 28px 24px; max-width: 380px; width: 92%; text-align: center; }
+.session-box { background: white; border-radius: 16px; padding: 28px 24px; max-width: 360px; width: 92%; text-align: center; }
 .session-box h2 { color: #1565C0; margin-bottom: 8px; font-size: 20px; }
-.session-box p { color: #555; margin-bottom: 16px; font-size: 14px; line-height: 1.6; }
-.session-box input { width: 100%; padding: 10px 14px; border: 2px solid #ccc; border-radius: 10px; font-size: 15px; font-family: inherit; direction: rtl; outline: none; margin-bottom: 10px; text-align: center; }
+.session-box p { color: #555; margin-bottom: 20px; font-size: 14px; line-height: 1.6; }
+.session-box input { width: 100%; padding: 10px 14px; border: 2px solid #ccc; border-radius: 10px; font-size: 16px; font-family: inherit; direction: rtl; outline: none; margin-bottom: 12px; text-align: center; }
 .session-box input:focus { border-color: #1565C0; }
-.hint { font-size: 12px; color: #999; margin-top: 10px; line-height: 1.5; }
-.divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
-.admin-link { font-size: 13px; color: #1565C0; cursor: pointer; text-decoration: underline; margin-top: 6px; display: inline-block; }
-
-.admin-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.admin-modal.hidden { display: none; }
-.admin-box { background: white; border-radius: 16px; padding: 28px 24px; max-width: 340px; width: 92%; text-align: center; }
-.admin-box h2 { color: #1565C0; margin-bottom: 8px; }
-.admin-box p { color: #666; margin-bottom: 16px; font-size: 14px; }
-.admin-box input { width: 100%; padding: 10px 14px; border: 2px solid #ccc; border-radius: 10px; font-size: 15px; font-family: inherit; direction: ltr; outline: none; margin-bottom: 12px; text-align: center; letter-spacing: 2px; }
-.admin-box input:focus { border-color: #1565C0; }
+.hint { font-size: 12px; color: #999; margin-top: 8px; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; }
 .modal-overlay.hidden { display: none; }
@@ -161,10 +154,6 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 .modal-box input { width: 100%; padding: 10px 12px; border: 1.5px solid #ccc; border-radius: 8px; font-size: 14px; font-family: inherit; direction: rtl; outline: none; margin-bottom: 10px; }
 .modal-box input:focus { border-color: #6a1b9a; }
 .modal-actions { display: flex; gap: 8px; }
-
-.project-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 200px; overflow-y: auto; }
-.project-item { background: #e3f2fd; border: 1.5px solid #1565C0; border-radius: 10px; padding: 10px 14px; cursor: pointer; font-weight: 600; color: #1565C0; text-align: right; font-size: 15px; transition: background .15s; }
-.project-item:hover { background: #bbdefb; }
 </style>
 
 </head>
@@ -176,31 +165,14 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
   <div style="font-size:13px;opacity:.7">يتم تحميل بياناتك من السحابة</div>
 </div>
 
-<div class="session-modal" id="sessionModal">
+<div class="session-modal hidden" id="sessionModal">
   <div class="session-box">
     <div style="font-size:44px;margin-bottom:8px">🇮🇶</div>
     <h2>الاخوان لتنفيذ واجهات</h2>
-    <p>اختر المشروع أو أدخل اسمه للدخول</p>
-    <div class="project-list" id="projectList"></div>
-    <input id="sessionInput" type="text" placeholder="اسم مشروع جديد (مثال: بيت احمد)" maxlength="40">
-    <button class="btn btn-blue" style="width:100%;justify-content:center;padding:12px;font-size:16px" onclick="enterAsViewer()">👁️ دخول كمشاهد</button>
-    <hr class="divider">
-    <span class="admin-link" onclick="showAdminModal()">🔐 دخول كمدير</span>
-    <div class="hint">المشاهد يرى البيانات فقط بدون تعديل<br>المدير يتحكم بكل شيء</div>
-  </div>
-</div>
-
-<div class="admin-modal hidden" id="adminModal">
-  <div class="admin-box">
-    <div style="font-size:36px;margin-bottom:8px">🔐</div>
-    <h2>دخول المدير</h2>
-    <p>أدخل كلمة السر للتعديل</p>
-    <input id="adminPassInput" type="password" placeholder="كلمة السر">
-    <div id="adminError" style="display:none;color:#e53935;font-size:14px;margin-bottom:10px;font-weight:600;padding:8px;background:#ffebee;border-radius:8px;"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-gray" style="flex:1;justify-content:center" onclick="closeAdminModal()">إلغاء</button>
-      <button class="btn btn-blue" style="flex:2;justify-content:center" onclick="verifyAdmin()">✅ دخول</button>
-    </div>
+    <p>أدخل اسم قاعدة بياناتك<br>للوصول إلى بياناتك من أي جهاز</p>
+    <input id="sessionInput" type="text" placeholder="مثال: مشروع احمد" maxlength="40">
+    <button class="btn btn-blue" style="width:100%;justify-content:center;padding:12px;font-size:16px" onclick="startSession()">← دخول</button>
+    <div class="hint">⚠️ احفظ هذا الاسم — ستحتاجه للدخول من أجهزة أخرى</div>
   </div>
 </div>
 
@@ -224,14 +196,11 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
     <button class="tab-btn active" onclick="showTab('summary')" id="tab-summary">📌 الملخص</button>
     <button class="tab-btn" onclick="showTab('payments')" id="tab-payments">💜 المقاول</button>
   </div>
-  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-    <span id="roleBadge" class="viewer-badge">👁️ مشاهد</span>
-    <span class="sync-label sync-ok" id="syncIndicator">☁️ محفوظ</span>
-  </div>
+  <span class="sync-label sync-ok" id="syncIndicator">☁️ محفوظ</span>
 </div>
 
 <div class="week-bar">
-  <div class="week-actions" id="weekActions">
+  <div class="week-actions">
     <button class="btn btn-blue" onclick="addWeek()">+ أسبوع</button>
     <button class="btn btn-red" onclick="deleteCurrentWeek()">🗑️</button>
   </div>
@@ -239,9 +208,9 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 </div>
 
 <div class="content">
+  <!-- WORKERS -->
   <div id="tab-workers-content" style="display:none">
-    <div id="readonlyNotice" class="readonly-notice hidden">👁️ أنت في وضع المشاهدة فقط — لا يمكن التعديل</div>
-    <div id="addWorkerCard" class="card">
+    <div class="card">
       <div class="card-body">
         <div style="font-size:16px;font-weight:700;color:#1565C0;margin-bottom:10px">👷 إضافة عامل جديد</div>
         <div class="form-row">
@@ -260,7 +229,7 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
         <span class="amount-badge" id="totalLoanBadge">0 دينار</span>
       </div>
       <div class="card-body">
-        <div id="addLoanForm" class="form-row">
+        <div class="form-row">
           <input id="loanAmount" type="number" placeholder="المبلغ">
           <input id="loanDate" type="date">
           <button class="btn btn-orange" onclick="addLoan()">إضافة</button>
@@ -274,15 +243,13 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
         <span class="amount-badge" id="totalExpBadge">0 دينار</span>
       </div>
       <div class="card-body">
-        <div id="addExpForm">
-          <div class="form-row">
-            <input id="expDesc" placeholder="وصف المصروف">
-            <input id="expAmount" type="number" placeholder="المبلغ">
-          </div>
-          <div class="form-row">
-            <input id="expDate" type="date">
-            <button class="btn btn-blue" onclick="addExpense()">إضافة</button>
-          </div>
+        <div class="form-row">
+          <input id="expDesc" placeholder="وصف المصروف">
+          <input id="expAmount" type="number" placeholder="المبلغ">
+        </div>
+        <div class="form-row">
+          <input id="expDate" type="date">
+          <button class="btn btn-blue" onclick="addExpense()">إضافة</button>
         </div>
         <div id="expensesList"></div>
       </div>
@@ -290,9 +257,13 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
     <div id="workersList"></div>
   </div>
 
+  <!-- SUMMARY -->
+
   <div id="tab-summary-content" style="display:block">
     <div id="summaryContent"></div>
   </div>
+
+  <!-- PAYMENTS -->
 
   <div id="tab-payments-content" style="display:none">
     <div class="card">
@@ -301,14 +272,14 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
         <span class="amount-badge" id="totalPaymentsBadge">0 دينار</span>
       </div>
       <div class="card-body">
-        <div id="contractorPhoneSection" style="margin-bottom:12px">
+        <div style="margin-bottom:12px">
           <div style="font-size:13px;color:#666;margin-bottom:6px">📱 رقم واتساب المقاول:</div>
           <div class="form-row">
-            <input id="contractorPhone" placeholder="مثال: 9647XXXXXXXXX" type="tel">
+            <input id="contractorPhone" placeholder="مثال: 213XXXXXXXXX" type="tel">
             <button class="btn btn-gray" onclick="saveContractorPhone()">حفظ</button>
           </div>
         </div>
-        <button id="addPaymentBtn" class="btn btn-purple" style="width:100%;justify-content:center;padding:12px;margin-bottom:12px" onclick="openPaymentModal()">
+        <button class="btn btn-purple" style="width:100%;justify-content:center;padding:12px;margin-bottom:12px" onclick="openPaymentModal()">
           + تسجيل مبلغ مستلم وإشعار المقاول
         </button>
         <div id="paymentsList"></div>
@@ -320,118 +291,15 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 <script>
 const DAYS = ['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
 let sessionKey = '', currentWeek = '', data = {}, saveTimer = null;
-let isAdmin = false;
-let pendingProjectName = '';
 
-function setAdminUI(admin) {
-  isAdmin = admin;
-  const badge = document.getElementById('roleBadge');
-  if (admin) {
-    badge.className = 'admin-badge';
-    badge.textContent = '🔑 مدير';
-  } else {
-    badge.className = 'viewer-badge';
-    badge.textContent = '👁️ مشاهد';
-  }
-  const notice = document.getElementById('readonlyNotice');
-  const addWorkerCard = document.getElementById('addWorkerCard');
-  const addLoanForm = document.getElementById('addLoanForm');
-  const addExpForm = document.getElementById('addExpForm');
-  const weekActions = document.getElementById('weekActions');
-  const contractorPhoneSection = document.getElementById('contractorPhoneSection');
-  const addPaymentBtn = document.getElementById('addPaymentBtn');
-
-  if (admin) {
-    notice.classList.add('hidden');
-    addWorkerCard.style.display = '';
-    addLoanForm.style.display = '';
-    addExpForm.style.display = '';
-    weekActions.style.display = '';
-    contractorPhoneSection.style.display = '';
-    addPaymentBtn.style.display = '';
-  } else {
-    notice.classList.remove('hidden');
-    addWorkerCard.style.display = 'none';
-    addLoanForm.style.display = 'none';
-    addExpForm.style.display = 'none';
-    weekActions.style.display = 'none';
-    contractorPhoneSection.style.display = 'none';
-    addPaymentBtn.style.display = 'none';
-  }
-}
-
-function showAdminModal() {
-  pendingProjectName = document.getElementById('sessionInput').value.trim();
-  if (!pendingProjectName) { alert('أدخل اسم المشروع أولاً'); return; }
-  document.getElementById('adminPassInput').value = '';
-  document.getElementById('adminModal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('adminPassInput').focus(), 100);
-}
-
-function closeAdminModal() {
-  document.getElementById('adminModal').classList.add('hidden');
-}
-
-function verifyAdmin() {
-  const pass = document.getElementById('adminPassInput').value;
-  const passClean = pass.trim();
-  const errEl = document.getElementById('adminError');
-  if (passClean === ADMIN_PASSWORD) {
-    errEl.style.display = 'none';
-    closeAdminModal();
-    startSession(pendingProjectName, true);
-  } else {
-    errEl.style.display = 'block';
-    errEl.textContent = '❌ كلمة السر غير صحيحة';
-    document.getElementById('adminPassInput').value = '';
-  }
-}
-
-function enterAsViewer() {
-  const val = document.getElementById('sessionInput').value.trim();
-  if (!val) { alert('أدخل اسم المشروع'); return; }
-  startSession(val, false);
-}
-
-function enterProjectFromList(name) {
-  document.getElementById('sessionInput').value = name;
-  startSession(name, false);
-}
-
-async function loadProjectList() {
-  try {
-    const projects = await window._fbGet('projects');
-    const listEl = document.getElementById('projectList');
-    if (projects && typeof projects === 'object') {
-      const keys = Object.keys(projects);
-      if (keys.length) {
-        listEl.innerHTML = '<div style="font-size:12px;color:#999;margin-bottom:6px">المشاريع الموجودة — اختر للدخول:</div>' +
-          keys.map(k => `<div class="project-item" onclick="enterProjectFromList('${k}')">${k.replace(/_/g,' ')}</div>`).join('');
-        return;
-      }
-    }
-    listEl.innerHTML = '';
-  } catch(e) {
-    document.getElementById('projectList').innerHTML = '';
-  }
-}
-
-function startSession(name, admin) {
-  sessionKey = name.toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g, '_');
-  // لا نحفظ حالة المدير في localStorage — دائماً يجب إدخال كلمة السر
-  localStorage.setItem('lastSession', sessionKey);
-  document.getElementById('sessionModal').classList.add('hidden');
-  initApp(admin);
-}
-
+// ===== FIREBASE SAVE/LOAD =====
 function setSyncStatus(s) {
   const el = document.getElementById('syncIndicator');
-  const m = { saving:['sync-pending','⏳ جاري الحفظ...'], ok:['sync-ok','☁️ محفوظ'], error:['sync-error','❌ خطأ'] };
+  const m = { saving:['sync-pending','⏳ جاري الحفظ...'], ok:['sync-ok','☁️ محفوظ'], error:['sync-error','❌ خطأ في الحفظ'] };
   el.className = 'sync-label ' + m[s][0]; el.textContent = m[s][1];
 }
 
 function saveData() {
-  if (!isAdmin) return;
   setSyncStatus('saving');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async () => {
@@ -439,34 +307,46 @@ function saveData() {
       await window._fbSet('projects/' + sessionKey, data);
       setSyncStatus('ok');
     } catch(e) {
+      console.error(e);
       setSyncStatus('error');
+      // fallback localStorage
       localStorage.setItem('fb_backup_'+sessionKey, JSON.stringify(data));
     }
   }, 700);
 }
 
-async function initApp(admin) {
+// ===== SESSION =====
+function startSession() {
+  const val = document.getElementById('sessionInput').value.trim();
+  if(!val) return alert('يرجى إدخال اسم المشروع');
+  sessionKey = val.toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g,'_');
+  localStorage.setItem('lastSession', sessionKey);
+  document.getElementById('sessionModal').classList.add('hidden');
+  initApp();
+}
+
+async function initApp() {
   document.getElementById('loadingOverlay').classList.remove('hidden');
   try {
     const saved = await window._fbGet('projects/' + sessionKey);
     data = saved || { weeks:{}, contractorPhone:'' };
   } catch(e) {
+    // fallback
     const local = localStorage.getItem('fb_backup_'+sessionKey);
     data = local ? JSON.parse(local) : { weeks:{}, contractorPhone:'' };
   }
-  if (!data.contractorPhone) data.contractorPhone = '';
+  if(!data.contractorPhone) data.contractorPhone = '';
   document.getElementById('loadingOverlay').classList.add('hidden');
-  setAdminUI(admin);
   buildWeekSelect();
   const weeks = Object.keys(data.weeks||{}).sort();
   currentWeek = weeks.length ? weeks[weeks.length-1] : null;
-  if (!currentWeek && admin) addWeek(true);
-  else if (currentWeek) document.getElementById('weekSelect').value = currentWeek;
-  if (data.contractorPhone) document.getElementById('contractorPhone').value = data.contractorPhone;
-  document.querySelector('.header-title').textContent = '🇮🇶 ' + sessionKey.replace(/_/g,' ');
-  renderAll(); showTab('summary');
+  if(!currentWeek) addWeek(true);
+  else document.getElementById('weekSelect').value = currentWeek;
+  if(data.contractorPhone) document.getElementById('contractorPhone').value = data.contractorPhone;
+  renderAll(); showTab('workers');
 }
 
+// ===== WEEKS =====
 function getTodaySat() {
   const d=new Date(); const diff=(d.getDay()+1)%7; d.setDate(d.getDate()-diff); return d.toISOString().slice(0,10);
 }
@@ -477,8 +357,7 @@ function buildWeekSelect() {
   });
 }
 function addWeek(silent=false) {
-  if (!isAdmin) return;
-  if (!data.weeks) data.weeks={};
+  if(!data.weeks) data.weeks={};
   const ex=Object.keys(data.weeks).sort();
   let key=!ex.length?getTodaySat():(() => { const d=new Date(ex[ex.length-1]); d.setDate(d.getDate()+7); return d.toISOString().slice(0,10); })();
   if(data.weeks[key]) return alert('هذا الأسبوع موجود');
@@ -490,7 +369,6 @@ function addWeek(silent=false) {
 }
 function loadWeek(){ currentWeek=document.getElementById('weekSelect').value; renderAll(); }
 function deleteCurrentWeek(){
-  if (!isAdmin) return;
   if(!currentWeek||!confirm('حذف هذا الأسبوع؟')) return;
   delete data.weeks[currentWeek];
   const w=Object.keys(data.weeks).sort(); currentWeek=w.length?w[w.length-1]:null;
@@ -499,8 +377,8 @@ function deleteCurrentWeek(){
 }
 function week(){ return currentWeek&&data.weeks&&data.weeks[currentWeek]?data.weeks[currentWeek]:{workers:[],loans:[],expenses:[],payments:[]}; }
 
+// ===== WORKERS =====
 function addWorker(){
-  if (!isAdmin) return;
   const name=document.getElementById('newWorkerName').value.trim();
   const wage=parseFloat(document.getElementById('newWorkerWage').value)||0;
   const phone=document.getElementById('newWorkerPhone').value.trim();
@@ -509,21 +387,14 @@ function addWorker(){
   ['newWorkerName','newWorkerWage','newWorkerPhone'].forEach(id=>document.getElementById(id).value='');
   saveData(); renderWorkers();
 }
-function toggleDay(i,di){
-  if (!isAdmin) return;
-  week().workers[i].days[di]=!week().workers[i].days[di]; saveData(); renderWorkers();
-}
+function toggleDay(i,di){ week().workers[i].days[di]=!week().workers[i].days[di]; saveData(); renderWorkers(); }
 function updateWorkerField(i,f,v){
-  if (!isAdmin) return;
   week().workers[i][f]=parseFloat(v)||0;
   const el=document.getElementById('final-'+i);
   if(el) el.textContent='💵 الأجر النهائي: '+calcWorkerSalary(week().workers[i])+' دينار';
   saveData();
 }
-function deleteWorker(i){
-  if (!isAdmin) return;
-  if(!confirm('حذف هذا العامل؟')) return; week().workers.splice(i,1); saveData(); renderWorkers();
-}
+function deleteWorker(i){ if(!confirm('حذف هذا العامل؟')) return; week().workers.splice(i,1); saveData(); renderWorkers(); }
 function calcWorkerSalary(w){ return (w.days.filter(Boolean).length*w.wage)+(w.advance||0)-(w.deduction||0); }
 
 function sendWhatsApp(i){
@@ -539,31 +410,30 @@ function printWorker(i){
 
 function renderWorkers(){
   const w=week(), c=document.getElementById('workersList');
-  if(!w.workers.length){c.innerHTML='<div class="empty-msg">لا يوجد عمال'+(isAdmin?' — أضف عاملاً جديداً 👆':'')+'</div>';return;}
+  if(!w.workers.length){c.innerHTML='<div class="empty-msg">لا يوجد عمال — أضف عاملاً جديداً 👆</div>';return;}
   c.innerHTML=w.workers.map((wk,i)=>{
     const net=calcWorkerSalary(wk);
-    const disabledAttr = isAdmin ? '' : 'disabled';
-    return `<div class="worker-card"><div class="worker-name-bar"><span>${wk.name}</span><span style="font-size:13px;color:#555">${wk.wage} د/يوم</span></div><div class="worker-body"><div class="days-row">${DAYS.map((d,di)=>`<button class="day-btn${wk.days[di]?' present':''}" onclick="toggleDay(${i},${di})" ${disabledAttr}>${d}</button>`).join('')}</div><div style="font-size:13px;color:#555;margin-bottom:8px">📆 ${wk.days.filter(Boolean).length} يوم حضور</div><div class="input-grid"><div class="input-box"><label>➕ سلفة (دينار)</label><input type="number" value="${wk.advance||0}" oninput="updateWorkerField(${i},'advance',this.value)" ${disabledAttr}></div><div class="input-box"><label>➖ خصم (دينار)</label><input type="number" value="${wk.deduction||0}" oninput="updateWorkerField(${i},'deduction',this.value)" ${disabledAttr}></div></div><div class="final-salary" id="final-${i}">💵 الأجر النهائي: ${net} دينار</div><div class="worker-actions"><button class="btn btn-teal" onclick="printWorker(${i})">🖨️ طباعة</button><button class="btn btn-green" onclick="sendWhatsApp(${i})">📱 واتساب</button>${isAdmin?`<button class="btn btn-red" onclick="deleteWorker(${i})">❌ حذف</button>`:''}</div></div></div>`;
+    return `<div class="worker-card"><div class="worker-name-bar"><span>${wk.name}</span><span style="font-size:13px;color:#555">${wk.wage} د/يوم</span></div><div class="worker-body"><div class="days-row">${DAYS.map((d,di)=>`<button class="day-btn${wk.days[di]?' present':''}" onclick="toggleDay(${i},${di})">${d}</button>`).join('')}</div><div style="font-size:13px;color:#555;margin-bottom:8px">📆 ${wk.days.filter(Boolean).length} يوم حضور</div><div class="input-grid"><div class="input-box"><label>➕ سلفة (دينار)</label><input type="number" value="${wk.advance||0}" oninput="updateWorkerField(${i},'advance',this.value)"></div><div class="input-box"><label>➖ خصم (دينار)</label><input type="number" value="${wk.deduction||0}" oninput="updateWorkerField(${i},'deduction',this.value)"></div></div><div class="final-salary" id="final-${i}">💵 الأجر النهائي: ${net} دينار</div><div class="worker-actions"><button class="btn btn-teal" onclick="printWorker(${i})">🖨️ طباعة</button><button class="btn btn-green" onclick="sendWhatsApp(${i})">📱 واتساب</button><button class="btn btn-red" onclick="deleteWorker(${i})">❌ حذف</button></div></div></div>`;
   }).join('');
 }
 
+// ===== LOANS =====
 function addLoan(){
-  if (!isAdmin) return;
   const a=parseFloat(document.getElementById('loanAmount').value); if(!a) return alert('أدخل المبلغ');
   const ld=document.getElementById('loanDate').value; if(!ld) return alert('يرجى إدخال التاريخ');
   week().loans.push({id:Date.now(),amount:a,date:ld});
   document.getElementById('loanAmount').value=''; saveData(); renderLoans(); renderSummary();
 }
-function deleteLoan(i){if (!isAdmin) return; week().loans.splice(i,1);saveData();renderLoans();renderSummary();}
+function deleteLoan(i){week().loans.splice(i,1);saveData();renderLoans();renderSummary();}
 function renderLoans(){
   const l=week().loans;
   document.getElementById('totalLoanBadge').textContent=l.reduce((s,x)=>s+x.amount,0)+' دينار';
   document.getElementById('loansList').innerHTML=!l.length?'<div class="empty-msg">لا توجد سلف</div>':
-    l.map((x,i)=>`<div class="item-row"><span class="item-amount" style="color:#c62828">${x.amount} دينار</span><span class="item-date">${x.date}</span>${isAdmin?`<button class="delete-btn" onclick="deleteLoan(${i})">✕</button>`:''}</div>`).join('');
+    l.map((x,i)=>`<div class="item-row"><span class="item-amount" style="color:#c62828">${x.amount} دينار</span><span class="item-date">${x.date}</span><button class="delete-btn" onclick="deleteLoan(${i})">✕</button></div>`).join('');
 }
 
+// ===== EXPENSES =====
 function addExpense(){
-  if (!isAdmin) return;
   const desc=document.getElementById('expDesc').value.trim(), a=parseFloat(document.getElementById('expAmount').value);
   if(!desc||!a) return alert('أدخل الوصف والمبلغ');
   const ed=document.getElementById('expDate').value; if(!ed) return alert('يرجى إدخال التاريخ');
@@ -571,28 +441,21 @@ function addExpense(){
   document.getElementById('expDesc').value=''; document.getElementById('expAmount').value='';
   saveData(); renderExpenses(); renderSummary();
 }
-function deleteExpense(i){if (!isAdmin) return; week().expenses.splice(i,1);saveData();renderExpenses();renderSummary();}
+function deleteExpense(i){week().expenses.splice(i,1);saveData();renderExpenses();renderSummary();}
 function renderExpenses(){
   const e=week().expenses;
   document.getElementById('totalExpBadge').textContent=e.reduce((s,x)=>s+x.amount,0)+' دينار';
   document.getElementById('expensesList').innerHTML=!e.length?'<div class="empty-msg">لا توجد مصروفات</div>':
-    e.map((x,i)=>`<div class="item-row"><span class="item-info">${x.desc}</span><span class="item-amount" style="color:#e65100">${x.amount} دينار</span><span class="item-date">${x.date}</span>${isAdmin?`<button class="delete-btn" onclick="deleteExpense(${i})">✕</button>`:''}</div>`).join('');
+    e.map((x,i)=>`<div class="item-row"><span class="item-info">${x.desc}</span><span class="item-amount" style="color:#e65100">${x.amount} دينار</span><span class="item-date">${x.date}</span><button class="delete-btn" onclick="deleteExpense(${i})">✕</button></div>`).join('');
 }
 
-function saveContractorPhone(){
-  if (!isAdmin) return;
-  data.contractorPhone=document.getElementById('contractorPhone').value.trim();saveData();alert('✅ تم حفظ رقم المقاول');
-}
-function openPaymentModal(){
-  if (!isAdmin) return;
-  document.getElementById('pmtAmount').value='';document.getElementById('pmtNote').value='';document.getElementById('pmtDate').value='';document.getElementById('paymentModal').classList.remove('hidden');
-}
+// ===== PAYMENTS =====
+function saveContractorPhone(){data.contractorPhone=document.getElementById('contractorPhone').value.trim();saveData();alert('✅ تم حفظ رقم المقاول');}
+function openPaymentModal(){document.getElementById('pmtAmount').value='';document.getElementById('pmtNote').value='';document.getElementById('pmtDate').value='';document.getElementById('paymentModal').classList.remove('hidden');}
 function closePaymentModal(){document.getElementById('paymentModal').classList.add('hidden');}
 function addPayment(){
-  if (!isAdmin) return;
   const a=parseFloat(document.getElementById('pmtAmount').value); if(!a) return alert('أدخل المبلغ');
-  const date=document.getElementById('pmtDate').value; if(!date) return alert('يرجى إدخال التاريخ');
-  const note=document.getElementById('pmtNote').value.trim();
+  const date=document.getElementById('pmtDate').value; if(!date) return alert('يرجى إدخال التاريخ'); const note=document.getElementById('pmtNote').value.trim();
   if(!week().payments) week().payments=[];
   week().payments.push({id:Date.now(),amount:a,date,note});
   const totalR=week().payments.reduce((s,p)=>s+p.amount,0);
@@ -602,32 +465,34 @@ function addPayment(){
   const phone=(data.contractorPhone||'').replace(/\D/g,'');
   const msg=`السلام عليكم 🏗️\n━━━━━━━━━━━━━━\n📋 إشعار استلام مبلغ\n📅 الأسبوع: ${currentWeek}\n━━━━━━━━━━━━━━\n💜 المبلغ المستلم الآن: ${a} دينار\n${note?'📝 '+note+'\n':''}📊 إجمالي المستلم: ${totalR} دينار\n💸 إجمالي المصاريف: ${totalC} دينار\n${bal>=0?'✅ المتبقي: '+bal:'⚠️ العجز: '+Math.abs(bal)} دينار\n━━━━━━━━━━━━━━\nبارك الله في جهودك وأعطاك الصحة والعافية 🇮🇶`;
   if(phone){ if(confirm('إرسال إشعار للمقاول على واتساب؟')) window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank'); }
-  else alert('✅ تم حفظ المبلغ!\n\nأضف رقم المقاول لإرسال إشعارات واتساب.');
+  else alert('✅ تم حفظ المبلغ في Firebase!\n\nأضف رقم المقاول لإرسال إشعارات واتساب.');
 }
-function deletePayment(i){if (!isAdmin) return; week().payments.splice(i,1);saveData();renderPayments();renderSummary();}
+function deletePayment(i){week().payments.splice(i,1);saveData();renderPayments();renderSummary();}
 function renderPayments(){
   const p=week().payments||[];
   document.getElementById('totalPaymentsBadge').textContent=p.reduce((s,x)=>s+x.amount,0)+' دينار';
   document.getElementById('paymentsList').innerHTML=!p.length?'<div class="empty-msg">لا توجد مبالغ مستلمة</div>':
-    p.map((x,i)=>`<div class="payment-item"><div><div class="p-amount">${x.amount} دينار</div>${x.note?`<div class="p-note">📝 ${x.note}</div>`:''}<div class="p-date">📅 ${x.date}</div></div>${isAdmin?`<button class="delete-btn" onclick="deletePayment(${i})">✕</button>`:''}</div>`).join('');
+    p.map((x,i)=>`<div class="payment-item"><div><div class="p-amount">${x.amount} دينار</div>${x.note?`<div class="p-note">📝 ${x.note}</div>`:''}<div class="p-date">📅 ${x.date}</div></div><button class="delete-btn" onclick="deletePayment(${i})">✕</button></div>`).join('');
 }
 
+// ===== EXCEL =====
 function exportToExcel(){
   const wb=XLSX.utils.book_new(), w=week();
   const wRows=[['الاسم','السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','عدد الأيام','الأجر اليومي','السلفة','الخصم','الأجر النهائي']];
   w.workers.forEach(wk=>{ const net=calcWorkerSalary(wk); wRows.push([wk.name,...wk.days.map(d=>d?'✓':'✗'),wk.days.filter(Boolean).length,wk.wage,wk.advance||0,wk.deduction||0,net]); });
   wRows.push([]); wRows.push(['الإجمالي','','','','','','','',w.workers.reduce((s,wk)=>s+wk.days.filter(Boolean).length,0),'',w.workers.reduce((s,wk)=>s+(wk.advance||0),0),w.workers.reduce((s,wk)=>s+(wk.deduction||0),0),w.workers.reduce((s,wk)=>s+calcWorkerSalary(wk),0)]);
-  const ws1=XLSX.utils.aoa_to_sheet(wRows); XLSX.utils.book_append_sheet(wb,ws1,'أجور العمال');
-  const eRows=[['الوصف','المبلغ','التاريخ']]; w.expenses.forEach(e=>eRows.push([e.desc,e.amount,e.date])); eRows.push(['الإجمالي',w.expenses.reduce((s,e)=>s+e.amount,0),'']);
-  const ws2=XLSX.utils.aoa_to_sheet(eRows); XLSX.utils.book_append_sheet(wb,ws2,'المصروفات');
-  const pRows=[['المبلغ المستلم','ملاحظة','التاريخ']]; (w.payments||[]).forEach(p=>pRows.push([p.amount,p.note||'',p.date]));
-  const ws3=XLSX.utils.aoa_to_sheet(pRows); XLSX.utils.book_append_sheet(wb,ws3,'المبالغ المستلمة');
+  const ws1=XLSX.utils.aoa_to_sheet(wRows); ws1['!cols']=[{wch:18},{wch:7},{wch:7},{wch:9},{wch:9},{wch:9},{wch:7},{wch:7},{wch:10},{wch:12},{wch:10},{wch:10},{wch:14}]; XLSX.utils.book_append_sheet(wb,ws1,'أجور العمال');
+  const eRows=[['الوصف','المبلغ','التاريخ']]; w.expenses.forEach(e=>eRows.push([e.desc,e.amount,e.date])); eRows.push(['الإجمالي',w.expenses.reduce((s,e)=>s+e.amount,0),'']); eRows.push([]); eRows.push(['سلفة المقاول','المبلغ','التاريخ']); w.loans.forEach(l=>eRows.push(['سلفة',l.amount,l.date])); eRows.push(['الإجمالي',w.loans.reduce((s,l)=>s+l.amount,0),'']);
+  const ws2=XLSX.utils.aoa_to_sheet(eRows); ws2['!cols']=[{wch:25},{wch:14},{wch:14}]; XLSX.utils.book_append_sheet(wb,ws2,'المصروفات والسلف');
+  const pRows=[['المبلغ المستلم','ملاحظة','التاريخ']]; (w.payments||[]).forEach(p=>pRows.push([p.amount,p.note||'',p.date])); pRows.push(['الإجمالي',(w.payments||[]).reduce((s,p)=>s+p.amount,0),'']);
+  const ws3=XLSX.utils.aoa_to_sheet(pRows); ws3['!cols']=[{wch:16},{wch:25},{wch:14}]; XLSX.utils.book_append_sheet(wb,ws3,'المبالغ المستلمة');
   const tW=w.workers.reduce((s,wk)=>s+calcWorkerSalary(wk),0), tL=w.loans.reduce((s,l)=>s+l.amount,0), tE=w.expenses.reduce((s,e)=>s+e.amount,0), tR=(w.payments||[]).reduce((s,p)=>s+p.amount,0), tC=tW+tL+tE, bal=tR-tC;
-  const sRows=[['ملخص',sessionKey.replace(/_/g,' ')],[],['البند','المبلغ'],['أجور العمال',tW],['المصروفات',tE],['سلف المقاول',tL],['الإجمالي',tC],[],['المستلم',tR],[bal>=0?'المتبقي':'العجز',Math.abs(bal)]];
-  const ws4=XLSX.utils.aoa_to_sheet(sRows); XLSX.utils.book_append_sheet(wb,ws4,'الملخص');
-  XLSX.writeFile(wb,`${sessionKey}_${currentWeek}.xlsx`);
+  const sRows=[['ملخص الأسبوع',currentWeek],[],['البند','المبلغ (دينار)'],['إجمالي أجور العمال',tW],['إجمالي المصروفات',tE],['إجمالي سلف المقاول',tL],['إجمالي المصاريف',tC],[],['إجمالي المستلم',tR],[bal>=0?'المتبقي (ربح)':'العجز',Math.abs(bal)]];
+  const ws4=XLSX.utils.aoa_to_sheet(sRows); ws4['!cols']=[{wch:28},{wch:18}]; XLSX.utils.book_append_sheet(wb,ws4,'الملخص');
+  XLSX.writeFile(wb,`حسابات_${currentWeek}.xlsx`);
 }
 
+// ===== SUMMARY =====
 function renderSummary(){
   const w=week(), tW=w.workers.reduce((s,wk)=>s+calcWorkerSalary(wk),0), tL=w.loans.reduce((s,l)=>s+l.amount,0), tE=w.expenses.reduce((s,e)=>s+e.amount,0), tC=tW+tL+tE, tR=(w.payments||[]).reduce((s,p)=>s+p.amount,0), bal=tR-tC;
   document.getElementById('summaryContent').innerHTML=`
@@ -640,16 +505,17 @@ function renderSummary(){
     <div class="summary-box green"><div class="summary-title">💰 أجور العمال</div>${w.workers.length?w.workers.map(wk=>`<div class="summary-row"><span>${wk.name} (${wk.days.filter(Boolean).length} يوم)</span><span style="color:#2e7d32;font-weight:700">${calcWorkerSalary(wk)} دينار</span></div>`).join(''):'<div class="empty-msg">لا يوجد عمال</div>'}<div class="summary-row"><span>الإجمالي:</span><span style="color:#2e7d32">${tW} دينار</span></div></div>
     <div class="summary-box orange"><div class="summary-title">🧾 المصروفات</div>${w.expenses.length?w.expenses.map(e=>`<div class="summary-row"><span>${e.desc}</span><span style="color:#e65100;font-weight:700">${e.amount} دينار</span></div>`).join(''):'<div class="empty-msg">لا توجد مصروفات</div>'}<div class="summary-row"><span>الإجمالي:</span><span style="color:#e65100">${tE} دينار</span></div></div>
     <div class="summary-box red"><div class="summary-title">💵 سلف المقاول</div>${w.loans.length?w.loans.map(l=>`<div class="summary-row"><span>${l.date}</span><span style="color:#c62828;font-weight:700">${l.amount} دينار</span></div>`).join(''):'<div class="empty-msg">لا توجد سلف</div>'}<div class="summary-row"><span>الإجمالي:</span><span style="color:#c62828">${tL} دينار</span></div></div>
-    <div class="summary-box purple"><div class="summary-title">💜 المبالغ المستلمة</div>${(w.payments||[]).length?(w.payments||[]).map(p=>`<div class="summary-row"><span>${p.date}${p.note?' — '+p.note:''}</span><span style="color:#6a1b9a;font-weight:700">${p.amount} دينار</span></div>`).join(''):'<div class="empty-msg">لا توجد مبالغ</div>'}<div class="summary-row"><span>الإجمالي:</span><span style="color:#6a1b9a">${tR} دينار</span></div></div>
-    <div class="summary-box blue"><div class="summary-title">📌 ملخص — ${currentWeek||'—'}</div><div class="summary-row"><span>💰 أجور العمال:</span><span>${tW} دينار</span></div><div class="summary-row"><span>🧾 المصروفات:</span><span>${tE} دينار</span></div><div class="summary-row"><span>💵 سلف المقاول:</span><span>${tL} دينار</span></div><div class="summary-row"><span>💸 إجمالي المصاريف:</span><span style="color:#c62828;font-weight:800">${tC} دينار</span></div><div class="summary-row"><span>💜 إجمالي المستلم:</span><span style="color:#6a1b9a">${tR} دينار</span></div><div class="summary-row"><span>${bal>=0?'✅ المتبقي':'⚠️ العجز'}:</span><span style="color:${bal>=0?'#2e7d32':'#c62828'};font-size:22px;font-weight:800">${Math.abs(bal)} دينار</span></div></div>`;
+    <div class="summary-box purple"><div class="summary-title">💜 المبالغ المستلمة</div>${(w.payments||[]).length?(w.payments||[]).map(p=>`<div class="summary-row"><span>${p.date}${p.note?' — '+p.note:''}</span><span style="color:#6a1b9a;font-weight:700">${p.amount} دينار</span></div>`).join(''):'<div class="empty-msg">لا توجد مبالغ مستلمة</div>'}<div class="summary-row"><span>الإجمالي:</span><span style="color:#6a1b9a">${tR} دينار</span></div></div>
+    <div class="summary-box blue"><div class="summary-title">📌 ملخص — ${currentWeek}</div><div class="summary-row"><span>💰 أجور العمال:</span><span>${tW} دينار</span></div><div class="summary-row"><span>🧾 المصروفات:</span><span>${tE} دينار</span></div><div class="summary-row"><span>💵 سلف المقاول:</span><span>${tL} دينار</span></div><div class="summary-row"><span>💸 إجمالي المصاريف:</span><span style="color:#c62828;font-weight:800">${tC} دينار</span></div><div class="summary-row"><span>💜 إجمالي المستلم:</span><span style="color:#6a1b9a">${tR} دينار</span></div><div class="summary-row"><span>${bal>=0?'✅ المتبقي':'⚠️ العجز'}:</span><span style="color:${bal>=0?'#2e7d32':'#c62828'};font-size:22px;font-weight:800">${Math.abs(bal)} دينار</span></div></div>`;
 }
 
 function printSummary(){
   const w=week(), tW=w.workers.reduce((s,wk)=>s+calcWorkerSalary(wk),0), tL=w.loans.reduce((s,l)=>s+l.amount,0), tE=w.expenses.reduce((s,e)=>s+e.amount,0), tR=(w.payments||[]).reduce((s,p)=>s+p.amount,0), tC=tW+tL+tE, bal=tR-tC;
   const win=window.open('','_blank');
-  win.document.write(`<html dir="rtl"><body style="font-family:Arial;padding:24px"><h2 style="color:#1565C0">ملخص — ${sessionKey.replace(/_/g,' ')} — ${currentWeek}</h2><h3>أجور العمال:</h3>${w.workers.map(wk=>`<p>${wk.name}: ${calcWorkerSalary(wk)} دينار (${wk.days.filter(Boolean).length} يوم)</p>`).join('')}<p><b>الإجمالي: ${tW} دينار</b></p><h3>المصروفات:</h3>${w.expenses.map(e=>`<p>${e.desc}: ${e.amount} دينار</p>`).join('')}<p><b>الإجمالي: ${tE} دينار</b></p><h3>سلف المقاول:</h3>${w.loans.map(l=>`<p>${l.date}: ${l.amount} دينار</p>`).join('')}<p><b>الإجمالي: ${tL} دينار</b></p><hr><h2 style="color:#c62828">إجمالي المصاريف: ${tC} دينار</h2><h2 style="color:${bal>=0?'#2e7d32':'#c62828'}">${bal>=0?'المتبقي':'العجز'}: ${Math.abs(bal)} دينار</h2><script>window.print()<\/script></body></html>`);
+  win.document.write(`<html dir="rtl"><body style="font-family:Arial;padding:24px"><h2 style="color:#1565C0">ملخص الأسبوع — ${currentWeek}</h2><h3>أجور العمال:</h3>${w.workers.map(wk=>`<p>${wk.name}: ${calcWorkerSalary(wk)} دينار (${wk.days.filter(Boolean).length} يوم)</p>`).join('')}<p><b>الإجمالي: ${tW} دينار</b></p><h3>المصروفات:</h3>${w.expenses.map(e=>`<p>${e.desc}: ${e.amount} دينار</p>`).join('')}<p><b>الإجمالي: ${tE} دينار</b></p><h3>سلف المقاول:</h3>${w.loans.map(l=>`<p>${l.date}: ${l.amount} دينار</p>`).join('')}<p><b>الإجمالي: ${tL} دينار</b></p><h3>المبالغ المستلمة:</h3>${(w.payments||[]).map(p=>`<p>${p.date}: ${p.amount} دينار${p.note?' — '+p.note:''}</p>`).join('')}<p><b>الإجمالي: ${tR} دينار</b></p><hr><h2 style="color:#c62828">إجمالي المصاريف: ${tC} دينار</h2><h2 style="color:${bal>=0?'#2e7d32':'#c62828'}">${bal>=0?'المتبقي':'العجز'}: ${Math.abs(bal)} دينار</h2><div style="text-align:center;color:#999;margin-top:20px">بارك الله في جهودك وأعطاك الصحة والعافية 🇮🇶</div><script>window.print()<\/script></body></html>`);
 }
 
+// ===== TABS =====
 function showTab(t){
   ['workers','summary','payments'].forEach(x=>{
     document.getElementById('tab-'+x+'-content').style.display=x===t?'block':'none';
@@ -658,37 +524,25 @@ function showTab(t){
   if(t==='summary') renderSummary();
   if(t==='payments') renderPayments();
 }
-function changeSession(){
-  if(!confirm('تغيير المشروع؟')) return;
-  localStorage.removeItem('lastSession');
-  location.reload();
-}
+function changeSession(){if(!confirm('تغيير المشروع؟')) return; localStorage.removeItem('lastSession'); location.reload();}
 function renderAll(){ renderWorkers(); renderLoans(); renderExpenses(); renderSummary(); renderPayments(); }
+function today(){ return new Date().toISOString().slice(0,10); }
 
+// ===== BOOT =====
 document.addEventListener('DOMContentLoaded', async () => {
-  const last = localStorage.getItem('lastSession');
-  if (last) {
-    sessionKey = last;
-    document.getElementById('sessionModal').classList.remove('hidden');
-    document.getElementById('sessionInput').value = last.replace(/_/g,' ');
-    document.getElementById('loadingOverlay').classList.add('hidden');
-    loadProjectList();
-  } else {
-    document.getElementById('loadingOverlay').classList.add('hidden');
-    document.getElementById('sessionModal').classList.remove('hidden');
-    loadProjectList();
-  }
+  // dates are manual
+  const last=localStorage.getItem('lastSession');
+  if(last){ sessionKey=last; document.getElementById('sessionModal').classList.add('hidden'); await initApp(); }
+  else { document.getElementById('loadingOverlay').classList.add('hidden'); document.getElementById('sessionModal').classList.remove('hidden'); }
 });
+document.getElementById('sessionInput').addEventListener('keydown', e=>{ if(e.key==='Enter') startSession(); });
 
-document.getElementById('adminPassInput').addEventListener('keydown', e => { if(e.key==='Enter') verifyAdmin(); });
-document.getElementById('sessionInput').addEventListener('keydown', e => { if(e.key==='Enter') enterAsViewer(); });
-
+// Timeout fallback
 setTimeout(()=>{
   if(document.getElementById('loadingOverlay').classList.contains('hidden')) return;
   document.getElementById('loadingOverlay').classList.add('hidden');
   document.getElementById('sessionModal').classList.remove('hidden');
-  loadProjectList();
-}, 5000);
+},5000);
 </script>
 
 </body>
