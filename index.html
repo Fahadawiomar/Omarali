@@ -372,12 +372,13 @@ function closeAdminModal() {
 }
 
 function verifyAdmin() {
-  const pass = document.getElementById('adminPassInput').value.trim();
-  if (pass === ADMIN_PASSWORD) {
+  const pass = document.getElementById('adminPassInput').value;
+  const passClean = pass.trim();
+  if (passClean === ADMIN_PASSWORD) {
     closeAdminModal();
     startSession(pendingProjectName, true);
   } else {
-    alert('❌ كلمة السر غير صحيحة');
+    alert('❌ كلمة السر غير صحيحة\nأدخلت: "' + passClean + '"\nالمطلوب: "' + ADMIN_PASSWORD + '"');
     document.getElementById('adminPassInput').value = '';
     document.getElementById('adminPassInput').focus();
   }
