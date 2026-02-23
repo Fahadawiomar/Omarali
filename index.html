@@ -196,6 +196,7 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
     <h2>دخول المدير</h2>
     <p>أدخل كلمة السر للتعديل</p>
     <input id="adminPassInput" type="password" placeholder="كلمة السر">
+    <div id="adminError" style="display:none;color:#e53935;font-size:14px;margin-bottom:10px;font-weight:600;padding:8px;background:#ffebee;border-radius:8px;"></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-gray" style="flex:1;justify-content:center" onclick="closeAdminModal()">إلغاء</button>
       <button class="btn btn-blue" style="flex:2;justify-content:center" onclick="verifyAdmin()">✅ دخول</button>
@@ -374,13 +375,15 @@ function closeAdminModal() {
 function verifyAdmin() {
   const pass = document.getElementById('adminPassInput').value;
   const passClean = pass.trim();
+  const errEl = document.getElementById('adminError');
   if (passClean === ADMIN_PASSWORD) {
+    errEl.style.display = 'none';
     closeAdminModal();
     startSession(pendingProjectName, true);
   } else {
-    alert('❌ كلمة السر غير صحيحة\nأدخلت: "' + passClean + '"\nالمطلوب: "' + ADMIN_PASSWORD + '"');
+    errEl.style.display = 'block';
+    errEl.textContent = '❌ كلمة السر غير صحيحة';
     document.getElementById('adminPassInput').value = '';
-    document.getElementById('adminPassInput').focus();
   }
 }
 
