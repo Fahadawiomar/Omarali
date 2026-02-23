@@ -12,27 +12,27 @@
 
 window.*fbSet = async (path, val) => {
 try {
-const cleanPath = path.replace(/[.#$[]]/g, ’*’);
+const cleanPath = path.replace(/[.#$[]]/g, ‘*’);
 const url = FB_URL + ‘/’ + cleanPath + ‘.json’;
 const res = await fetch(url, { method: ‘PUT’, headers: {‘Content-Type’: ‘application/json’}, body: JSON.stringify(val) });
 const result = await res.json();
 if (result && result.error) throw new Error(result.error);
-localStorage.setItem(‘backup_’ + cleanPath.replace(///g,’_’), JSON.stringify(val));
+localStorage.setItem(’backup*’ + cleanPath.replace(///g,’_’), JSON.stringify(val));
 return true;
 } catch(e) { console.error(‘Firebase save failed:’, e); return false; }
 };
 
 window.*fbGet = async (path) => {
 try {
-const cleanPath = path.replace(/[.#$[]]/g, ’*’);
+const cleanPath = path.replace(/[.#$[]]/g, ‘*’);
 const url = FB_URL + ‘/’ + cleanPath + ‘.json’;
 const res = await fetch(url);
 const result = await res.json();
 if (result && result.error) throw new Error(result.error);
-if (result !== null) localStorage.setItem(‘backup_’ + cleanPath.replace(///g,’*’), JSON.stringify(result));
+if (result !== null) localStorage.setItem(’backup*’ + cleanPath.replace(///g,’*’), JSON.stringify(result));
 return result;
 } catch(e) {
-const local = localStorage.getItem(’backup*’ + path.replace(/[.#$[]]/g,’*’).replace(///g,’*’));
+const local = localStorage.getItem(‘backup_’ + path.replace(/[.#$[]]/g,’*’).replace(///g,’*’));
 return local ? JSON.parse(local) : null;
 }
 };
@@ -55,7 +55,6 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 .sync-pending { background: #ff9800; color: white; }
 .sync-error { background: #f44336; color: white; }
 
-/* Admin badge */
 .admin-badge { background: #ffd600; color: #333; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
 .viewer-badge { background: rgba(255,255,255,0.25); color: white; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
 
@@ -129,7 +128,6 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 .payment-item .p-note { font-size: 13px; color: #555; }
 .payment-item .p-date { font-size: 12px; color: #888; }
 
-/* Read-only overlay for viewers */
 .readonly-notice { background: #fff3e0; border: 2px solid #e65100; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 14px; color: #e65100; font-weight: 600; text-align: center; }
 
 .loading-overlay { position: fixed; inset: 0; background: rgba(21,101,192,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; z-index: 9999; gap: 16px; }
@@ -137,7 +135,6 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 .spinner { width: 48px; height: 48px; border: 5px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Project selection modal */
 .session-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9998; }
 .session-modal.hidden { display: none; }
 .session-box { background: white; border-radius: 20px; padding: 28px 24px; max-width: 380px; width: 92%; text-align: center; }
@@ -149,11 +146,11 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 .divider { border: none; border-top: 1px solid #eee; margin: 16px 0; }
 .admin-link { font-size: 13px; color: #1565C0; cursor: pointer; text-decoration: underline; margin-top: 6px; display: inline-block; }
 
-/* Admin login modal */
 .admin-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; }
 .admin-modal.hidden { display: none; }
 .admin-box { background: white; border-radius: 16px; padding: 28px 24px; max-width: 340px; width: 92%; text-align: center; }
 .admin-box h2 { color: #1565C0; margin-bottom: 8px; }
+.admin-box p { color: #666; margin-bottom: 16px; font-size: 14px; }
 .admin-box input { width: 100%; padding: 10px 14px; border: 2px solid #ccc; border-radius: 10px; font-size: 15px; font-family: inherit; direction: ltr; outline: none; margin-bottom: 12px; text-align: center; letter-spacing: 2px; }
 .admin-box input:focus { border-color: #1565C0; }
 
@@ -165,7 +162,6 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 .modal-box input:focus { border-color: #6a1b9a; }
 .modal-actions { display: flex; gap: 8px; }
 
-/* Project list */
 .project-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 200px; overflow-y: auto; }
 .project-item { background: #e3f2fd; border: 1.5px solid #1565C0; border-radius: 10px; padding: 10px 14px; cursor: pointer; font-weight: 600; color: #1565C0; text-align: right; font-size: 15px; transition: background .15s; }
 .project-item:hover { background: #bbdefb; }
@@ -180,34 +176,25 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
   <div style="font-size:13px;opacity:.7">يتم تحميل بياناتك من السحابة</div>
 </div>
 
-<!-- Project Selection Modal -->
-
 <div class="session-modal" id="sessionModal">
   <div class="session-box">
     <div style="font-size:44px;margin-bottom:8px">🇮🇶</div>
     <h2>الاخوان لتنفيذ واجهات</h2>
     <p>اختر المشروع أو أدخل اسمه للدخول</p>
-
-```
-<div class="project-list" id="projectList"></div>
-
-<input id="sessionInput" type="text" placeholder="اسم مشروع جديد (مثال: بيت احمد)" maxlength="40">
-<button class="btn btn-blue" style="width:100%;justify-content:center;padding:12px;font-size:16px" onclick="enterAsViewer()">👁️ دخول كمشاهد</button>
-<hr class="divider">
-<span class="admin-link" onclick="showAdminModal()">🔐 دخول كمدير</span>
-<div class="hint">المشاهد يرى البيانات فقط بدون تعديل<br>المدير يتحكم بكل شيء</div>
-```
-
+    <div class="project-list" id="projectList"></div>
+    <input id="sessionInput" type="text" placeholder="اسم مشروع جديد (مثال: بيت احمد)" maxlength="40">
+    <button class="btn btn-blue" style="width:100%;justify-content:center;padding:12px;font-size:16px" onclick="enterAsViewer()">👁️ دخول كمشاهد</button>
+    <hr class="divider">
+    <span class="admin-link" onclick="showAdminModal()">🔐 دخول كمدير</span>
+    <div class="hint">المشاهد يرى البيانات فقط بدون تعديل<br>المدير يتحكم بكل شيء</div>
   </div>
 </div>
-
-<!-- Admin Password Modal -->
 
 <div class="admin-modal hidden" id="adminModal">
   <div class="admin-box">
     <div style="font-size:36px;margin-bottom:8px">🔐</div>
     <h2>دخول المدير</h2>
-    <p style="color:#666;margin-bottom:16px;font-size:14px">أدخل كلمة السر للتعديل</p>
+    <p>أدخل كلمة السر للتعديل</p>
     <input id="adminPassInput" type="password" placeholder="كلمة السر">
     <div style="display:flex;gap:8px">
       <button class="btn btn-gray" style="flex:1;justify-content:center" onclick="closeAdminModal()">إلغاء</button>
@@ -215,8 +202,6 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
     </div>
   </div>
 </div>
-
-<!-- Payment Modal -->
 
 <div class="modal-overlay hidden" id="paymentModal">
   <div class="modal-box">
@@ -253,7 +238,6 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 </div>
 
 <div class="content">
-  <!-- WORKERS -->
   <div id="tab-workers-content" style="display:none">
     <div id="readonlyNotice" class="readonly-notice hidden">👁️ أنت في وضع المشاهدة فقط — لا يمكن التعديل</div>
     <div id="addWorkerCard" class="card">
@@ -305,13 +289,9 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
     <div id="workersList"></div>
   </div>
 
-  <!-- SUMMARY -->
-
   <div id="tab-summary-content" style="display:block">
     <div id="summaryContent"></div>
   </div>
-
-  <!-- PAYMENTS -->
 
   <div id="tab-payments-content" style="display:none">
     <div class="card">
@@ -342,10 +322,8 @@ let sessionKey = '', currentWeek = '', data = {}, saveTimer = null;
 let isAdmin = false;
 let pendingProjectName = '';
 
-// ===== ROLE MANAGEMENT =====
 function setAdminUI(admin) {
   isAdmin = admin;
-  // Role badge
   const badge = document.getElementById('roleBadge');
   if (admin) {
     badge.className = 'admin-badge';
@@ -354,7 +332,6 @@ function setAdminUI(admin) {
     badge.className = 'viewer-badge';
     badge.textContent = '👁️ مشاهد';
   }
-  // Show/hide admin controls
   const notice = document.getElementById('readonlyNotice');
   const addWorkerCard = document.getElementById('addWorkerCard');
   const addLoanForm = document.getElementById('addLoanForm');
@@ -382,7 +359,6 @@ function setAdminUI(admin) {
   }
 }
 
-// ===== SESSION MODAL =====
 function showAdminModal() {
   pendingProjectName = document.getElementById('sessionInput').value.trim();
   if (!pendingProjectName) { alert('أدخل اسم المشروع أولاً'); return; }
@@ -396,13 +372,14 @@ function closeAdminModal() {
 }
 
 function verifyAdmin() {
-  const pass = document.getElementById('adminPassInput').value;
+  const pass = document.getElementById('adminPassInput').value.trim();
   if (pass === ADMIN_PASSWORD) {
     closeAdminModal();
     startSession(pendingProjectName, true);
   } else {
     alert('❌ كلمة السر غير صحيحة');
     document.getElementById('adminPassInput').value = '';
+    document.getElementById('adminPassInput').focus();
   }
 }
 
@@ -414,7 +391,6 @@ function enterAsViewer() {
 
 function enterProjectFromList(name) {
   document.getElementById('sessionInput').value = name;
-  // Viewer by default from list; admin must click admin link
   startSession(name, false);
 }
 
@@ -438,13 +414,12 @@ async function loadProjectList() {
 
 function startSession(name, admin) {
   sessionKey = name.toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g, '_');
+  // لا نحفظ حالة المدير في localStorage — دائماً يجب إدخال كلمة السر
   localStorage.setItem('lastSession', sessionKey);
-  localStorage.setItem('lastSessionAdmin', admin ? '1' : '0');
   document.getElementById('sessionModal').classList.add('hidden');
   initApp(admin);
 }
 
-// ===== FIREBASE =====
 function setSyncStatus(s) {
   const el = document.getElementById('syncIndicator');
   const m = { saving:['sync-pending','⏳ جاري الحفظ...'], ok:['sync-ok','☁️ محفوظ'], error:['sync-error','❌ خطأ'] };
@@ -484,14 +459,10 @@ async function initApp(admin) {
   if (!currentWeek && admin) addWeek(true);
   else if (currentWeek) document.getElementById('weekSelect').value = currentWeek;
   if (data.contractorPhone) document.getElementById('contractorPhone').value = data.contractorPhone;
-  
-  // Update header title with project name
   document.querySelector('.header-title').textContent = '🇮🇶 ' + sessionKey.replace(/_/g,' ');
-  
   renderAll(); showTab('summary');
 }
 
-// ===== WEEKS =====
 function getTodaySat() {
   const d=new Date(); const diff=(d.getDay()+1)%7; d.setDate(d.getDate()-diff); return d.toISOString().slice(0,10);
 }
@@ -524,7 +495,6 @@ function deleteCurrentWeek(){
 }
 function week(){ return currentWeek&&data.weeks&&data.weeks[currentWeek]?data.weeks[currentWeek]:{workers:[],loans:[],expenses:[],payments:[]}; }
 
-// ===== WORKERS =====
 function addWorker(){
   if (!isAdmin) return;
   const name=document.getElementById('newWorkerName').value.trim();
@@ -573,7 +543,6 @@ function renderWorkers(){
   }).join('');
 }
 
-// ===== LOANS =====
 function addLoan(){
   if (!isAdmin) return;
   const a=parseFloat(document.getElementById('loanAmount').value); if(!a) return alert('أدخل المبلغ');
@@ -589,7 +558,6 @@ function renderLoans(){
     l.map((x,i)=>`<div class="item-row"><span class="item-amount" style="color:#c62828">${x.amount} دينار</span><span class="item-date">${x.date}</span>${isAdmin?`<button class="delete-btn" onclick="deleteLoan(${i})">✕</button>`:''}</div>`).join('');
 }
 
-// ===== EXPENSES =====
 function addExpense(){
   if (!isAdmin) return;
   const desc=document.getElementById('expDesc').value.trim(), a=parseFloat(document.getElementById('expAmount').value);
@@ -607,7 +575,6 @@ function renderExpenses(){
     e.map((x,i)=>`<div class="item-row"><span class="item-info">${x.desc}</span><span class="item-amount" style="color:#e65100">${x.amount} دينار</span><span class="item-date">${x.date}</span>${isAdmin?`<button class="delete-btn" onclick="deleteExpense(${i})">✕</button>`:''}</div>`).join('');
 }
 
-// ===== PAYMENTS =====
 function saveContractorPhone(){
   if (!isAdmin) return;
   data.contractorPhone=document.getElementById('contractorPhone').value.trim();saveData();alert('✅ تم حفظ رقم المقاول');
@@ -641,7 +608,6 @@ function renderPayments(){
     p.map((x,i)=>`<div class="payment-item"><div><div class="p-amount">${x.amount} دينار</div>${x.note?`<div class="p-note">📝 ${x.note}</div>`:''}<div class="p-date">📅 ${x.date}</div></div>${isAdmin?`<button class="delete-btn" onclick="deletePayment(${i})">✕</button>`:''}</div>`).join('');
 }
 
-// ===== EXCEL =====
 function exportToExcel(){
   const wb=XLSX.utils.book_new(), w=week();
   const wRows=[['الاسم','السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','عدد الأيام','الأجر اليومي','السلفة','الخصم','الأجر النهائي']];
@@ -658,7 +624,6 @@ function exportToExcel(){
   XLSX.writeFile(wb,`${sessionKey}_${currentWeek}.xlsx`);
 }
 
-// ===== SUMMARY =====
 function renderSummary(){
   const w=week(), tW=w.workers.reduce((s,wk)=>s+calcWorkerSalary(wk),0), tL=w.loans.reduce((s,l)=>s+l.amount,0), tE=w.expenses.reduce((s,e)=>s+e.amount,0), tC=tW+tL+tE, tR=(w.payments||[]).reduce((s,p)=>s+p.amount,0), bal=tR-tC;
   document.getElementById('summaryContent').innerHTML=`
@@ -681,7 +646,6 @@ function printSummary(){
   win.document.write(`<html dir="rtl"><body style="font-family:Arial;padding:24px"><h2 style="color:#1565C0">ملخص — ${sessionKey.replace(/_/g,' ')} — ${currentWeek}</h2><h3>أجور العمال:</h3>${w.workers.map(wk=>`<p>${wk.name}: ${calcWorkerSalary(wk)} دينار (${wk.days.filter(Boolean).length} يوم)</p>`).join('')}<p><b>الإجمالي: ${tW} دينار</b></p><h3>المصروفات:</h3>${w.expenses.map(e=>`<p>${e.desc}: ${e.amount} دينار</p>`).join('')}<p><b>الإجمالي: ${tE} دينار</b></p><h3>سلف المقاول:</h3>${w.loans.map(l=>`<p>${l.date}: ${l.amount} دينار</p>`).join('')}<p><b>الإجمالي: ${tL} دينار</b></p><hr><h2 style="color:#c62828">إجمالي المصاريف: ${tC} دينار</h2><h2 style="color:${bal>=0?'#2e7d32':'#c62828'}">${bal>=0?'المتبقي':'العجز'}: ${Math.abs(bal)} دينار</h2><script>window.print()<\/script></body></html>`);
 }
 
-// ===== TABS =====
 function showTab(t){
   ['workers','summary','payments'].forEach(x=>{
     document.getElementById('tab-'+x+'-content').style.display=x===t?'block':'none';
@@ -693,19 +657,18 @@ function showTab(t){
 function changeSession(){
   if(!confirm('تغيير المشروع؟')) return;
   localStorage.removeItem('lastSession');
-  localStorage.removeItem('lastSessionAdmin');
   location.reload();
 }
 function renderAll(){ renderWorkers(); renderLoans(); renderExpenses(); renderSummary(); renderPayments(); }
 
-// ===== BOOT =====
 document.addEventListener('DOMContentLoaded', async () => {
   const last = localStorage.getItem('lastSession');
-  const lastAdmin = localStorage.getItem('lastSessionAdmin') === '1';
   if (last) {
     sessionKey = last;
-    document.getElementById('sessionModal').classList.add('hidden');
-    await initApp(lastAdmin);
+    document.getElementById('sessionModal').classList.remove('hidden');
+    document.getElementById('sessionInput').value = last.replace(/_/g,' ');
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    loadProjectList();
   } else {
     document.getElementById('loadingOverlay').classList.add('hidden');
     document.getElementById('sessionModal').classList.remove('hidden');
