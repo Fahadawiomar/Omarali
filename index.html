@@ -56,6 +56,12 @@ window._firebaseReady = true;
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; direction: rtl; font-size: 15px; }
 
+/* ✅ التحكم بواجهة المدير/المشاهد عبر CSS على الـ body */
+body.is-viewer .admin-only { display: none !important; }
+body.is-viewer .viewer-only { display: block !important; }
+body.is-admin .viewer-only { display: none !important; }
+body.is-admin .admin-only { display: block !important; }
+
 .header { background: #1565C0; color: white; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; flex-wrap: wrap; gap: 8px; }
 .header-title { font-size: 17px; font-weight: 700; }
 .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -180,7 +186,7 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 </style>
 
 </head>
-<body>
+<body class="is-viewer">
 
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
@@ -243,7 +249,7 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 </div>
 
 <div class="week-bar">
-  <div class="week-actions" id="weekActions">
+  <div class="week-actions admin-only" id="weekActions">
     <button class="btn btn-blue" onclick="addWeek()">+ أسبوع</button>
     <button class="btn btn-red" onclick="deleteCurrentWeek()">🗑️</button>
   </div>
@@ -252,8 +258,8 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
 
 <div class="content">
   <div id="tab-workers-content" style="display:none">
-    <div id="readonlyNotice" class="readonly-notice hidden">👁️ أنت في وضع المشاهدة فقط — لا يمكن التعديل</div>
-    <div id="addWorkerCard" class="card">
+    <div class="readonly-notice viewer-only">👁️ أنت في وضع المشاهدة فقط — لا يمكن التعديل</div>
+    <div id="addWorkerCard" class="card admin-only">
       <div class="card-body">
         <div style="font-size:16px;font-weight:700;color:#1565C0;margin-bottom:10px">👷 إضافة عامل جديد</div>
         <div class="form-row">
@@ -272,7 +278,7 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
         <span class="amount-badge" id="totalLoanBadge">0 دينار</span>
       </div>
       <div class="card-body">
-        <div id="addLoanForm" class="form-row">
+        <div id="addLoanForm" class="form-row admin-only">
           <input id="loanAmount" type="number" placeholder="المبلغ">
           <input id="loanDate" type="date">
           <button class="btn btn-orange" onclick="addLoan()">إضافة</button>
@@ -286,7 +292,7 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
         <span class="amount-badge" id="totalExpBadge">0 دينار</span>
       </div>
       <div class="card-body">
-        <div id="addExpForm">
+        <div id="addExpForm" class="admin-only">
           <div class="form-row">
             <input id="expDesc" placeholder="وصف المصروف">
             <input id="expAmount" type="number" placeholder="المبلغ">
@@ -313,14 +319,14 @@ body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f4f8; 
         <span class="amount-badge" id="totalPaymentsBadge">0 دينار</span>
       </div>
       <div class="card-body">
-        <div id="contractorPhoneSection" style="margin-bottom:12px">
+        <div id="contractorPhoneSection" class="admin-only" style="margin-bottom:12px">
           <div style="font-size:13px;color:#666;margin-bottom:6px">📱 رقم واتساب المقاول:</div>
           <div class="form-row">
             <input id="contractorPhone" placeholder="مثال: 9647XXXXXXXXX" type="tel">
             <button class="btn btn-gray" onclick="saveContractorPhone()">حفظ</button>
           </div>
         </div>
-        <button id="addPaymentBtn" class="btn btn-purple" style="width:100%;justify-content:center;padding:12px;margin-bottom:12px" onclick="openPaymentModal()">
+        <button id="addPaymentBtn" class="btn btn-purple admin-only" style="width:100%;justify-content:center;padding:12px;margin-bottom:12px" onclick="openPaymentModal()">
           + تسجيل مبلغ مستلم وإشعار المقاول
         </button>
         <div id="paymentsList"></div>
@@ -341,34 +347,13 @@ function setAdminUI(admin) {
   if (admin) {
     badge.className = 'admin-badge';
     badge.textContent = '🔑 مدير';
+    document.body.classList.remove('is-viewer');
+    document.body.classList.add('is-admin');
   } else {
     badge.className = 'viewer-badge';
     badge.textContent = '👁️ مشاهد';
-  }
-  const notice = document.getElementById('readonlyNotice');
-  const addWorkerCard = document.getElementById('addWorkerCard');
-  const addLoanForm = document.getElementById('addLoanForm');
-  const addExpForm = document.getElementById('addExpForm');
-  const weekActions = document.getElementById('weekActions');
-  const contractorPhoneSection = document.getElementById('contractorPhoneSection');
-  const addPaymentBtn = document.getElementById('addPaymentBtn');
-
-  if (admin) {
-    notice.classList.add('hidden');
-    addWorkerCard.style.display = '';
-    addLoanForm.style.display = '';
-    addExpForm.style.display = '';
-    weekActions.style.display = '';
-    contractorPhoneSection.style.display = '';
-    addPaymentBtn.style.display = '';
-  } else {
-    notice.classList.remove('hidden');
-    addWorkerCard.style.display = 'none';
-    addLoanForm.style.display = 'none';
-    addExpForm.style.display = 'none';
-    weekActions.style.display = 'none';
-    contractorPhoneSection.style.display = 'none';
-    addPaymentBtn.style.display = 'none';
+    document.body.classList.remove('is-admin');
+    document.body.classList.add('is-viewer');
   }
 }
 
