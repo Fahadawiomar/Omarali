@@ -8,7 +8,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
   const FB_URL = "https://omar-ali-97d74-default-rtdb.firebaseio.com";
-  const ADMIN_PASSWORD = "1234";
 
 // ✅ إصلاح: استخدام _ بدل * في أسماء الدوال
 window.*fbSet = async (path, val) => {
@@ -200,25 +199,8 @@ body.is-admin .admin-only { display: block !important; }
     <h2>الاخوان لتنفيذ واجهات</h2>
     <p>اختر المشروع أو أدخل اسمه للدخول</p>
     <div class="project-list" id="projectList"></div>
-    <input id="sessionInput" type="text" placeholder="اسم مشروع جديد (مثال: بيت احمد)" maxlength="40">
-    <button class="btn btn-blue" style="width:100%;justify-content:center;padding:12px;font-size:16px" onclick="enterAsViewer()">👁️ دخول كمشاهد</button>
-    <hr class="divider">
-    <span class="admin-link" onclick="showAdminModal()">🔐 دخول كمدير</span>
-    <div class="hint">المشاهد يرى البيانات فقط بدون تعديل<br>المدير يتحكم بكل شيء</div>
-  </div>
-</div>
-
-<div class="admin-modal hidden" id="adminModal">
-  <div class="admin-box">
-    <div style="font-size:36px;margin-bottom:8px">🔐</div>
-    <h2>دخول المدير</h2>
-    <p>أدخل كلمة السر للتعديل</p>
-    <input id="adminPassInput" type="password" placeholder="كلمة السر">
-    <div id="adminError" style="display:none;color:#e53935;font-size:14px;margin-bottom:10px;font-weight:600;padding:8px;background:#ffebee;border-radius:8px;"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-gray" style="flex:1;justify-content:center" onclick="closeAdminModal()">إلغاء</button>
-      <button class="btn btn-blue" style="flex:2;justify-content:center" onclick="verifyAdmin()">✅ دخول</button>
-    </div>
+    <input id="sessionInput" type="text" placeholder="اسم مشروع (مثال: بيت احمد)" maxlength="40">
+    <button class="btn btn-blue" style="width:100%;justify-content:center;padding:12px;font-size:16px" onclick="enterApp()">🚀 دخول</button>
   </div>
 </div>
 
@@ -243,7 +225,6 @@ body.is-admin .admin-only { display: block !important; }
     <button class="tab-btn" onclick="showTab('payments')" id="tab-payments">💜 المقاول</button>
   </div>
   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-    <span id="roleBadge" class="viewer-badge">👁️ مشاهد</span>
     <span class="sync-label sync-ok" id="syncIndicator">☁️ محفوظ</span>
   </div>
 </div>
@@ -339,63 +320,22 @@ body.is-admin .admin-only { display: block !important; }
 const DAYS = ['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
 let sessionKey = '', currentWeek = '', data = {}, saveTimer = null;
 let isAdmin = false;
-let pendingProjectName = '';
 
 function setAdminUI(admin) {
   isAdmin = admin;
-  const badge = document.getElementById('roleBadge');
-  if (admin) {
-    badge.className = 'admin-badge';
-    badge.textContent = '🔑 مدير';
-    document.body.classList.remove('is-viewer');
-    document.body.classList.add('is-admin');
-  } else {
-    badge.className = 'viewer-badge';
-    badge.textContent = '👁️ مشاهد';
-    document.body.classList.remove('is-admin');
-    document.body.classList.add('is-viewer');
-  }
+  document.body.classList.remove('is-viewer');
+  document.body.classList.add('is-admin');
 }
 
-function showAdminModal() {
-  const val = document.getElementById('sessionInput').value.trim();
-  if (!val) { alert('أدخل اسم المشروع أولاً'); return; }
-  pendingProjectName = val;
-  document.getElementById('adminPassInput').value = '';
-  document.getElementById('adminError').style.display = 'none';
-  document.getElementById('adminModal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('adminPassInput').focus(), 100);
-}
-
-function closeAdminModal() {
-  document.getElementById('adminModal').classList.add('hidden');
-}
-
-function verifyAdmin() {
-  const pass = document.getElementById('adminPassInput').value;
-  const errEl = document.getElementById('adminError');
-  if (pass === ADMIN_PASSWORD) {
-    errEl.style.display = 'none';
-    closeAdminModal();
-    startSession(pendingProjectName, true);
-  } else {
-    errEl.style.display = 'block';
-    errEl.textContent = '❌ كلمة السر غير صحيحة';
-    document.getElementById('adminPassInput').value = '';
-    document.getElementById('adminPassInput').focus();
-  }
-}
-
-function enterAsViewer() {
+function enterApp() {
   const val = document.getElementById('sessionInput').value.trim();
   if (!val) { alert('أدخل اسم المشروع'); return; }
-  startSession(val, false);
+  startSession(val, true);
 }
 
 function enterProjectFromList(name) {
   document.getElementById('sessionInput').value = name;
-  // فتح نافذة الدخول كمشاهد أو مدير
-  startSession(name, false);
+  startSession(name, true);
 }
 
 async function loadProjectList() {
@@ -940,12 +880,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadProjectList();
 });
 
-// اختصارات لوحة المفاتيح
-document.getElementById('adminPassInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') verifyAdmin();
-});
 document.getElementById('sessionInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') enterAsViewer();
+  if (e.key === 'Enter') enterApp();
 });
 
 // حماية من التعليق إذا فشل Firebase
